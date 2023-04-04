@@ -1,0 +1,197 @@
+<template>
+  <template if:true={loaded}>
+    <lightning-spinner alternative-text="Loading"></lightning-spinner>
+  </template>
+  <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+    <lightning-tabset>
+      <lightning-tab 
+        onactive={handleActive} 
+        label="Create Instalment Schedules (with schedule)" 
+        value="1">
+          <div class="slds-m-bottom_xx-small">
+            <lightning-input
+              onchange={getDescriptionForInstallmentSubscription}
+              required
+              type="text"
+              label="Name"></lightning-input>
+          </div>
+          <div class="slds-m-bottom_xx-small">
+            <lightning-combobox
+              onchange={getCurrency}
+              name="Currency"
+              label="Currency"
+              value="USD"
+              placeholder="Select Currency"
+              options={currencyOptions}
+              required></lightning-combobox>
+          </div>
+          <div class="slds-m-bottom_xx-small">
+            <lightning-input
+              onchange={getTotalAmount}
+              type="number"
+
+              label="Total Amount"
+              placeholder="Enter Total Amount 222"
+              formatter="currency">
+            </lightning-input>
+          </div>
+          <div class="slds-m-bottom_xx-small">
+            <lightning-input onchange={getStartDate} type="date" label="Start date" value={todayDate}></lightning-input>
+          </div>
+          <div class="slds-m-bottom_xx-small">
+            <lightning-combobox
+              onchange={getIntervalUnitForInstallmentSubscription}
+              value={intervalUnit}
+              name="Select Interval Unit"
+              label="Interval unit"
+              placeholder="Select Interval"
+              options={intervalOptions}
+              required></lightning-combobox>
+          </div>
+          <div class="slds-m-bottom_xx-small">
+            <lightning-combobox
+              onchange={getInterval}
+              value={interval}
+              name="Interval"
+              label="Interval"
+              placeholder="Select Interval Unit"
+              options={optionsForIntervalUnit}
+              required></lightning-combobox>
+          </div>
+          <div style="width: fit-content" class="slds-m-bottom_xx-small slds-grid">
+            <div class="slds-size_1-of-3">
+              <lightning-input
+                onchange={getPresetValueOne}
+                type="number"
+                label="Amount Preset 1"
+                placeholder="Enter Preset 1"
+                formatter="currency">
+              </lightning-input>
+            </div>
+            <div class="slds-size_1-of-3 slds-m-horizontal_small">
+              <lightning-input
+                onchange={getPresetValueTwo}
+                type="number"
+                label="Amount Preset 2"
+                placeholder="Enter Preset 2"
+                formatter="currency">
+              </lightning-input>
+            </div>
+            <div class="slds-size_1-of-3">
+              <lightning-input
+                onchange={getPresetValueThree}
+                type="number"
+                label="Amount Preset 3"
+                placeholder="Enter Preset 3"
+                formatter="currency">
+              </lightning-input>
+            </div>
+          </div>
+          <div>
+            <lightning-button
+              style="width: fit-content"
+              class="slds-m-top_small slds-align_absolute-center custom-btn"
+              label="Create Instalment Schedule"
+              title="Create Mandate"
+              onclick={getAllDetails}></lightning-button>
+          </div>
+      </lightning-tab>
+
+      <lightning-tab 
+        onactive={handleActive} 
+        label="Create Instalment Schedules (with dates)" 
+        value="2">
+          <div class="slds-m-bottom_xx-small">
+            <lightning-input
+              onchange={getDescriptionForDateAPI}
+              type="text"
+              required
+              label="Description"></lightning-input>
+          </div>
+
+          <div class="slds-m-bottom_xx-small">
+            <lightning-input
+              onchange={getTotalAmount}
+              type="number"
+              label="Total Amount"
+              placeholder="Enter Total Amount 111"
+              formatter="currency">
+            </lightning-input>
+          </div>
+
+          <div class="slds-m-bottom_xx-small">
+            <lightning-combobox
+              onchange={getCurrency}
+              name="Currency"
+              label="Currency"
+              value="USD"
+              placeholder="Select Currency"
+              options={currencyOptions}
+              required></lightning-combobox>
+          </div>
+
+          <div style="width: fit-content" class="slds-m-bottom_xx-small slds-grid">
+            <div class="slds-size_1-of-3">
+              <lightning-input
+                onchange={getPresetValueOneForDateApi}
+                type="number"
+                label="First Charge Amount"
+                placeholder="Enter first charge amount"
+                formatter="currency">
+              </lightning-input>
+              <div class="slds-m-bottom_xx-small">
+                <lightning-input
+                  onchange={getStartDateOneForDateApi}
+                  type="date"
+                  label="Enter first charge date"
+                  value={todayDate}></lightning-input>
+              </div>
+            </div>
+
+            <div class="slds-size_1-of-3 slds-p-horizontal_small">
+              <lightning-input
+                onchange={getPresetValueTwoForDateApi}
+                type="number"
+                label="Second Charge Amount"
+                placeholder="Enter second charge amount"
+                formatter="currency">
+              </lightning-input>
+              <div class="slds-m-bottom_xx-small">
+                <lightning-input
+                  onchange={getStartDateTwoForDateApi}
+                  type="date"
+                  label="Enter second charge date"
+                  value={todayDate}></lightning-input>
+              </div>
+            </div>
+
+            <div class="slds-size_1-of-3">
+              <lightning-input
+                onchange={getPresetValueThreeForDateApi}
+                type="number"
+                label="Third Charge Amount"
+                placeholder="Enter third charge amount"
+                formatter="currency">
+              </lightning-input>
+              <div class="slds-m-bottom_xx-small">
+                <lightning-input
+                  onchange={getStartDateThreeForDateApi}
+                  type="date"
+                  label="Enter third charge date"
+                  value={todayDate}></lightning-input>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <lightning-button
+              style="width: fit-content"
+              class="slds-m-top_small slds-align_absolute-center custom-btn"
+              label="Create Instalment Schedule"
+              title="Create Instalment Schedule"
+              onclick={getAllDetails}></lightning-button>
+          </div>
+      </lightning-tab>
+    </lightning-tabset>
+  </div>
+</template>

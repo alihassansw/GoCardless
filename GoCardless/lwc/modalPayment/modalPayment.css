@@ -1,0 +1,20 @@
+:host {
+    --primary-color: #fff;
+    --primary-color-alt-shade: #fff;
+    --secondary-color: #0650ad;
+    --secondary-color-alt-shade: #0854b3;
+    /* Button styling hooks */
+    --sds-c-button-text-color: var(--primary-color);
+    --sds-c-button-text-color-hover: var(--primary-color-alt-shade);
+    --sds-c-button-text-color-active: var(--secondary-color);
+    --sds-c-button-neutral-color-background: var(--secondary-color);
+    --sds-c-button-neutral-color-background-hover: var(--secondary-color-alt-shade);
+    --sds-c-button-neutral-color-background-active: var(--primary-color);
+    --sds-c-button-neutral-color-border: var(--primary-color);
+    --sds-c-button-neutral-color-border-hover: var(--primary-color-alt-shade);
+    --sds-c-button-neutral-color-border-active: var(--secondary-color-alt-shade);
+}
+
+.slds-icon-standard-payment-gateway {
+    background-color: var(--secondary-color);
+}

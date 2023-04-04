@@ -1,0 +1,66 @@
+<template>
+  <template if:true={showComponent}>
+    <lightning-card variant="Narrow" title="Charge Mandates" icon-name="standard:payment_gateway">
+      <div class="slds-p-horizontal_small">
+        <lightning-combobox
+          onchange={getComponent}
+          name="Component"
+          label="Component"
+          value={getComponentName}
+          placeholder="Select Component"
+          options={getComponents}></lightning-combobox>
+      </div>
+      <div class="slds-p-around_xxx-small">
+        <div class="slds-grid slds-size_1-of-4">
+          <img
+            style="object-fit: cover; height: 50px;"
+            width="140px"
+            src="https://www.vectorlogo.zone/logos/gocardless/gocardless-ar21.svg" />
+        </div>
+      </div>
+    </lightning-card>
+
+    <!-- modal start -->
+    <template if:true={isShowModal}>
+      <section class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+            <button
+              class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+              title="Close"
+              onclick={hideModalBox}>
+              <lightning-icon
+                icon-name="utility:close"
+                alternative-text="close"
+                variant="inverse"
+                size="small"></lightning-icon>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{ComponentHeading}</h2>
+          </header>
+
+          <!--  Mandate Component -->
+          <template if:true={chargeMandateComponent}>
+            <!-- modal body start -->
+            <c-mandate-payment onclosemodal={handleCloseModal} page-id={recordId}></c-mandate-payment>
+          </template>
+
+          <!-- Installment Subscription Component -->
+          <template if:true={installmentSubscriptionComponent}>
+            <c-create-instalment-schedule
+              onclosemodal={handleCloseModal}
+              page-id={recordId}></c-create-instalment-schedule>
+          </template>
+
+          <!-- Subscription Component -->
+          <template if:true={subscriptionComponent}>
+            <c-create-subcription onclosemodal={handleCloseModal} page-id={recordId}></c-create-subcription>
+          </template>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!-- modal end -->
+  </template>
+</template>

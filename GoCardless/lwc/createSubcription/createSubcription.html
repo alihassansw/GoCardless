@@ -1,0 +1,82 @@
+<template>
+  <template if:true={loaded}>
+    <lightning-spinner alternative-text="Loading"></lightning-spinner>
+  </template>
+  <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+    <div class="slds-m-bottom_xx-small">
+      <lightning-input onchange={getDescription} type="text" required label="Description"></lightning-input>
+    </div>
+
+    <div class="slds-m-bottom_xx-small">
+      <lightning-input onchange={getTotalAmount} type="number" label="Amount" placeholder="Enter Amount">
+      </lightning-input>
+    </div>
+
+    <div class="slds-m-bottom_xx-small">
+      <lightning-combobox
+        onchange={getCurrencyForSubscription}
+        name="Currency"
+        label="Currency"
+        value="USD"
+        placeholder="Select Currency"
+        options={currencyOptions}
+        required></lightning-combobox>
+    </div>
+
+    <div class="slds-m-bottom_xx-small">
+      <lightning-combobox
+        onchange={getbillingFrequency}
+        name="Billing Frequency"
+        value={intervalUnit}
+        label="Select Billing Frequency"
+        placeholder="Select Billing Frequency"
+        options={billingFrequency}
+        required>
+      </lightning-combobox>
+    </div>
+
+    <div class="slds-m-bottom_xx-small">
+      <lightning-combobox
+        label="Contract Duration"
+        value={selectedDuration}
+        options={durationOptions}
+        onchange={handleChange}>
+      </lightning-combobox>
+    </div>
+
+    <div class="slds-m-bottom_xx-small">
+      <lightning-input
+        required
+        onchange={getDayOfMonth}
+        type="number"
+        label="Day Of Month *Select if interval unit is monthly"
+        value={todayDate}
+        min="1"
+        max="31"></lightning-input>
+    </div>
+
+    <div class="slds-m-bottom_xx-small">
+      <lightning-input
+        type="date"
+        label="End Date *if count and end date is not specified, the subscription will continue forever"
+        value={todayDate}></lightning-input>
+    </div>
+
+    <div class="slds-m-bottom_xx-small">
+      <lightning-input
+        onchange={getCount}
+        type="number"
+        label="Total Count *if count and end date is not specified, the subscription will continue forever"
+        placeholder="Enter Total Count">
+      </lightning-input>
+    </div>
+
+    <lightning-button
+      style="width: fit-content"
+      class="slds-m-top_small slds-align_absolute-center custom-btn"
+      label="Create Subscription"
+      title="Create Subscription"
+      onclick={getAllDetailsForSubscription}>
+    </lightning-button>
+  </div>
+</template>

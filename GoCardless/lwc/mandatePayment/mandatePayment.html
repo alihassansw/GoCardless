@@ -1,0 +1,58 @@
+<template>
+  <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+    <div>
+      <template if:true={loaded}>
+        <lightning-spinner alternative-text="Loading"></lightning-spinner>
+      </template>
+      <div>
+        <div class="slds-theme_default slds-p-around_medium">
+          <div class="slds-m-bottom_small">
+            <lightning-input
+              onchange={getDescriptionForChargeMandate}
+              required
+              type="text"
+              label="Description"></lightning-input>
+          </div>
+
+          <div class="slds-m-bottom_small">
+            <lightning-combobox
+              name="Currency"
+              label="Currency"
+              value="USD"
+              placeholder="Select Currency"
+              options={currencyOptions}
+              onchange={handleCurrency}
+              required></lightning-combobox>
+          </div>
+
+          <div class="slds-m-bottom_small">
+            <lightning-input
+              required
+              type="number"
+              class="inputAmount"
+              label="Enter Amount"
+              placeholder="Enter Amount"
+              step="1"
+              onchange={getPayment}
+              min="1"
+              max="10000"></lightning-input>
+          </div>
+
+          <div class="slds-m-bottom_small">
+            <lightning-input
+              required
+              type="date"
+              label="Charge Date (If you don't enter the date, the payment will be charged automatically to mandate's next possible charge date)"
+              onchange={handleDate}
+              value={customDate}></lightning-input>
+          </div>
+
+          <div class="slds-m-top_small slds-align_absolute-center">
+            <lightning-button class="slds-m-left_x-small" label="Charge Mandate" onclick={handleCreatePayment}>
+            </lightning-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
