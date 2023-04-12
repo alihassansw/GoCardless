@@ -11,7 +11,7 @@
 public with sharing class GoCardlessRequest {
   /******************************   AccessTokken From GoCardless    ******************************/
 
-  private static final String ACCESS_TOKEN = 'sandbox_vIHy3XM4teoiyzgCndLymJm1Gn0pMSDJ8cQh5OsO';
+  private static final String ACCESS_TOKEN = 'x.xxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyzzzzzzzzzz';
   private static final String BASE_URL = 'https://api-sandbox.gocardless.com';
   private static final String VERSION = '2015-07-06';
 
