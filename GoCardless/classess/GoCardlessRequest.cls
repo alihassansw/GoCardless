@@ -1,7 +1,7 @@
 /*
 ********************************************************
 @Method Name    : GoCardlessRequest
-@written by     : Aasia Naseer 
+@written by     : Ali Hassan
 @description    : Methods to hit APIs to GoCardless
 @param          :
 @return         : Output
