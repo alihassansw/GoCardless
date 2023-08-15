@@ -11,7 +11,7 @@
 public with sharing class GoCardlessRequest {
   /******************************   AccessTokken From GoCardless    ******************************/
 
-  private static final String ACCESS_TOKEN = 'x.xxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyzzzzzzzzzz';
+  private static final String XYZ = 'x.xxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyzzzzzzzzzz';
   private static final String BASE_URL = 'https://api-sandbox.gocardless.com';
   private static final String VERSION = '2015-07-06';
 
@@ -620,7 +620,7 @@ public with sharing class GoCardlessRequest {
     req.setEndpoint(endpoint);
     req.setMethod(method);
     req.setHeader('GoCardless-Version', VERSION);
-    req.setHeader('Authorization', 'Bearer ' + ACCESS_TOKEN);
+    req.setHeader('Authorization', 'Bearer ' + XYZ);
     req.setHeader('Accept', 'application/json');
     req.setHeader('Content-Type', 'application/json');
     if (requestBody != null) {
