@@ -1,12 +1,3 @@
-/*
-********************************************************
-@Method Name    : GoCardlessRequest
-@written by     : Ali Hassan
-@description    : Methods to hit APIs to GoCardless
-@param          :
-@return         : Output
-********************************************************
-*/
 
 public with sharing class GoCardlessRequest {
   /******************************   AccessTokken From GoCardless    ******************************/
