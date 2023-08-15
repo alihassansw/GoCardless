@@ -3,7 +3,7 @@ public with sharing class GoCardlessRequest {
   /******************************   AccessTokken From GoCardless    ******************************/
 
   private static final String XYZ = 'x.xxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyzzzzzzzzzz';
-  private static final String BASE_URL = 'https://api-sandbox.gocardless.com';
+  private static final String url = 'https://api-xyz.com';
   private static final String VERSION = '2015-07-06';
 
   /******************************   Create Mandate Methods    ******************************/
