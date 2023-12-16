@@ -1,9 +1,11 @@
-
 public with sharing class GoCardlessRequest {
   /******************************   AccessTokken From GoCardless    ******************************/
 
-  private static final String XYZ = 'x.xxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyzzzzzzzzzz';
-  private static final String url = 'https://api-xyz.com';
+
+  public static String chargeDate;
+  public static String sub_Url = 'https://api-sandbox.example.com/';
+  public static final String baseURL = 'https://api-sandbox.example.com';
+  private static final String accessToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
   private static final String VERSION = '2015-07-06';
 
   /******************************   Create Mandate Methods    ******************************/
@@ -12,7 +14,7 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String createMandate(String createMandateBody) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/billing_requests';
+    String endpoint = baseURL + '/billing_requests';
 
     // Send HTTP request
     HttpResponse res = callAPI('POST', endpoint, createMandateBody, null);
@@ -25,7 +27,7 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String createBillingRequestFlow(String createMandateBodyFlow, String currentRecordId) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/billing_request_flows';
+    String endpoint = baseURL + '/billing_request_flows';
 
     // Send HTTP request
     HttpResponse res = callAPI('POST', endpoint, createMandateBodyFlow, null);
@@ -59,7 +61,7 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String getMandate(String billingRequestId, String opportunityId) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/billing_requests/' + billingRequestId;
+    String endpoint = baseURL + '/billing_requests/' + billingRequestId;
 
     // Send HTTP request
     HttpResponse res = callAPI('GET', endpoint, null, null);
@@ -73,13 +75,17 @@ public with sharing class GoCardlessRequest {
         Map<String, Object> links = (Map<String, Object>) mandateRequest.get('links');
         String mandate = (String) links.get('mandate');
         String billingId = (String) billingRequests.get('id');
+        if (mandate != null) {
+          GoCardlessRequest.getMandateChargeDate(mandate);
+        }
+        System.debug('ChargeDate From Get Mandate: ' + chargeDate);
 
         List<Opportunity> opportunitiesToUpdate = new List<Opportunity>();
         List<Contact> contactsToUpdate = new List<Contact>();
 
         // Query Opportunities and related Contacts
         List<Opportunity> opportunities = [
-          SELECT Id, Mandate_Id__c, Contact_Name__c, Contact_Name__r.Mandate_Id__c
+          SELECT Id, Mandate_Id__c, next_possible_charge_date__c, Contact_Name__c, Contact_Name__r.Mandate_Id__c
           FROM Opportunity
           WHERE Id = :opportunityId
         ];
@@ -91,6 +97,9 @@ public with sharing class GoCardlessRequest {
             contactsToUpdate.add(opp.Contact_Name__r);
           }
           opp.Mandate_Id__c = mandate;
+          if (chargeDate != null) {
+            opp.next_possible_charge_date__c = date.valueOf(chargeDate);
+          }
           opportunitiesToUpdate.add(opp);
         }
 
@@ -113,10 +122,17 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String getMandateChargeDate(String mandateId) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/mandates/' + mandateId;
+    String endpoint = baseURL + '/mandates/' + mandateId;
 
     // Send HTTP request
     HttpResponse res = callAPI('GET', endpoint, null, null);
+
+    // Parse the response body into a JSON object
+    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+
+    // Get the value of next_possible_charge_date
+    Map<String, Object> mandatesMap = (Map<String, Object>) responseMap.get('mandates');
+    chargeDate = (String) mandatesMap.get('next_possible_charge_date');
 
     //Get the Response
     return res.getBody();
@@ -128,7 +144,7 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String createMandatePayment(String paymentMandateBody, String oppId) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/payments';
+    String endpoint = baseURL + '/payments';
 
     // Send HTTP request
     HttpResponse res = callAPI('POST', endpoint, paymentMandateBody, null);
@@ -153,7 +169,7 @@ public with sharing class GoCardlessRequest {
       String status = payment.status;
       Integer amountRefunded = payment.amount_refunded;
       String reference = payment.reference;
-      Map<String, Object> metadata = payment.metadata;
+      // Map<String, Object> metadata = payment.metadata;
       PaymentFX fx = payment.fx;
       PaymentLinks links = payment.links;
       Boolean retryIfPossible = payment.retry_if_possible;
@@ -220,7 +236,7 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String instalmentSchedules(String instalmentSchedulesBody, String oppId) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/instalment_schedules';
+    String endpoint = baseURL + '/instalment_schedules';
 
     // Construct the REST API endpoint URL
     HttpResponse res = callAPI('POST', endpoint, instalmentSchedulesBody, null);
@@ -233,7 +249,7 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String getInstalmentSchedules(String instalmentScheduleId, String oppId) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/instalment_schedules/' + instalmentScheduleId;
+    String endpoint = baseURL + '/instalment_schedules/' + instalmentScheduleId;
 
     // Construct the REST API endpoint URL
     HttpResponse res = callAPI('GET', endpoint, null, null);
@@ -316,7 +332,7 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static String createSubscription(String createSubscriptionBody, String oppId) {
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/subscriptions';
+    String endpoint = baseURL + '/subscriptions';
 
     // Construct the REST API endpoint URL
     HttpResponse res = callAPI('POST', endpoint, createSubscriptionBody, null);
@@ -393,6 +409,7 @@ public with sharing class GoCardlessRequest {
             obj.Currency__c = SubscriptionCurrency;
             obj.Status__c = status;
             obj.Day_of_month__c = day_of_month;
+            obj.Start_date__c = startDate;
             obj.End_date__c = endDate;
             obj.Count__c = count == null ? 'Not Specified' : String.valueOf(count);
             obj.Interval__c = interval;
@@ -445,7 +462,7 @@ public with sharing class GoCardlessRequest {
             //Insert the List to the Object
             update objForOpportunity;
           }
-
+          System.debug('oppId: ' + oppId);
           //Query the record of AcctSeed__Recurring_Billing__c to get the newly made record
           List<AcctSeed__Recurring_Billing__c> recurringBillings = [
             SELECT
@@ -459,10 +476,17 @@ public with sharing class GoCardlessRequest {
               Count__c,
               Subscription_description__c,
               Subscription_Start_Date__c,
-              Subscription_End_Date__c
+              Subscription_URL__c,
+              Subscription_End_Date__c,
+              GoCardless_Subscription_Amount__c
             FROM AcctSeed__Recurring_Billing__c
             WHERE AcctSeed__Opportunity__c = :oppId
           ];
+
+          Date first_not_passed = null;
+          Date first_passed = null;
+          boolean first_element_not_passed = false;
+          boolean first_element_passed = false;
 
           for (AcctSeed__Recurring_Billing__c billings : recurringBillings) {
             //Inserting in AcctSeed__Recurring_Billing__c Object
@@ -471,11 +495,37 @@ public with sharing class GoCardlessRequest {
             billings.Subscription_description__c = name;
             billings.Created_at__c = Datetime.valueOf(createdAt);
             billings.Subscription_amount__c = Decimal.valueOf(amount.Substring(0, amount.length() - 2));
+            billings.GoCardless_Subscription_Amount__c = Decimal.valueOf(amount);
             billings.GoCardless_Status__c = status;
             billings.Day_of_month__c = Decimal.valueOf(day_of_month);
             billings.Count__c = (count == null) ? 'Not Specified' : count;
             billings.Subscription_Start_Date__c = startDate;
             billings.Subscription_End_Date__c = endDate;
+            billings.Subscription_URL__c = sub_Url + 'subscriptions/' + id;
+
+            for (UpcomingPayment up : upcoming_payments) {
+              Date currentDate = Date.today();
+              if (up.charge_date > currentDate) {
+                if (first_not_passed == null) {
+                  first_not_passed = up.charge_date;
+                  first_element_not_passed = true;
+                }
+              } else {
+                if (first_passed == null) {
+                  first_passed = up.charge_date;
+                  first_element_passed = true;
+                }
+              }
+            }
+            System.debug('first_passed: ' + first_passed);
+            System.debug('first_not_passed: ' + first_not_passed);
+            billings.AcctSeed__Last_Billing_Date__c = first_passed;
+            if (first_not_passed == null) {
+              billings.AcctSeed__Next_Billing_Date__c = Date.today();
+            } else {
+              billings.AcctSeed__Next_Billing_Date__c = first_not_passed;
+            }
+
             // // order.AcctSeed__Last_Billing_Date__c = ;
             // // order.AcctSeed__Next_Billing_Date__c = ;
 
@@ -500,6 +550,132 @@ public with sharing class GoCardlessRequest {
     return res.getBody();
   }
 
+  //Get Subscription to Mandate
+  @AuraEnabled
+  public static void getSubscription(String subId) {
+    // Construct the REST API endpoint URL
+    String endpoint = baseURL + '/subscriptions/' + subId;
+
+    // Construct the REST API endpoint URL
+    HttpResponse res = callAPI('GET', endpoint, null, null);
+
+    String responseString = res.getBody();
+    Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(responseString);
+
+    Subscriptions Subscriptions = (Subscriptions) JSON.deserialize(
+      JSON.serialize(jsonMap.get('subscriptions')),
+      Subscriptions.class
+    );
+
+    //If the Api Returns Success and status in not cancelled
+    if (res.getStatusCode() == 200 && !res.getBody().contains('cancelled')) {
+      String id = Subscriptions.id;
+      DateTime createdAt = Subscriptions.created_at;
+      String amount = Subscriptions.amount;
+      // String paymentCurrency = Subscriptions.instalment_currency;
+      String name = Subscriptions.name;
+      String status = Subscriptions.status;
+      Date startDate = Subscriptions.start_date;
+      Date endDate = Subscriptions.end_date;
+      String interval = Subscriptions.interval;
+      String interval_unit = Subscriptions.interval_unit;
+      Integer day_of_month = Subscriptions.day_of_month;
+      String count = Subscriptions.count;
+      Map<String, Object> metadata = Subscriptions.metadata;
+      Boolean payment_reference = Subscriptions.payment_reference;
+      SubscriptionLinks links = Subscriptions.links;
+      String mandate = links.mandate;
+      List<UpcomingPayment> upcoming_payments = Subscriptions.upcoming_payments;
+
+      //Extracting the Currency in the response
+      Map<String, Object> SubscriptionMap = (Map<String, Object>) jsonMap.get('subscriptions');
+
+      List<AcctSeed__Recurring_Billing__c> billingsToInsert = new List<AcctSeed__Recurring_Billing__c>();
+
+      //Query the record of AcctSeed__Recurring_Billing__c to get the newly made record
+      List<AcctSeed__Recurring_Billing__c> recurringBillings = [
+        SELECT Id, Subscription_amount__c, GoCardless_Status__c, GoCardless_Subscription_Amount__c
+        FROM AcctSeed__Recurring_Billing__c
+        WHERE Subscription_id__c = :subId
+      ];
+
+      Date first_not_passed = null;
+      Date first_passed = null;
+      boolean first_element_not_passed = false;
+      boolean first_element_passed = false;
+
+      for (AcctSeed__Recurring_Billing__c billings : recurringBillings) {
+        //Inserting in AcctSeed__Recurring_Billing__c Object
+        billings.GoCardless_Status__c = status;
+
+        for (UpcomingPayment up : upcoming_payments) {
+          Date currentDate = Date.today();
+          if (up.charge_date > currentDate) {
+            if (first_not_passed == null) {
+              first_not_passed = up.charge_date;
+              first_element_not_passed = true;
+            }
+          } else {
+            if (first_passed == null) {
+              first_passed = up.charge_date;
+              first_element_passed = true;
+            }
+          }
+        }
+        billings.AcctSeed__Last_Billing_Date__c = first_passed;
+        if (first_not_passed == null) {
+          billings.AcctSeed__Next_Billing_Date__c = Date.today();
+        } else {
+          billings.AcctSeed__Next_Billing_Date__c = first_not_passed;
+        }
+
+        //Add the data to the List(billingsToInsert) : AcctSeed__Recurring_Billing__c Object
+        billingsToInsert.add(billings);
+      }
+
+      if (!billingsToInsert.isEmpty()) {
+        //Insert the List to the Object
+        update billingsToInsert;
+      }
+    } else if (res.getStatusCode() == 200 && res.getBody().contains('cancelled')) {
+      String amount = Subscriptions.amount;
+      // String paymentCurrency = Subscriptions.instalment_currency;
+      String status = Subscriptions.status;
+
+      //Extracting the Currency in the response
+      Map<String, Object> SubscriptionMap = (Map<String, Object>) jsonMap.get('subscriptions');
+
+      List<AcctSeed__Recurring_Billing__c> billingsToInsert = new List<AcctSeed__Recurring_Billing__c>();
+
+      //Query the record of AcctSeed__Recurring_Billing__c to get the newly made record
+      List<AcctSeed__Recurring_Billing__c> recurringBillings = [
+        SELECT Id, Subscription_amount__c, GoCardless_Status__c, GoCardless_Subscription_Amount__c
+        FROM AcctSeed__Recurring_Billing__c
+        WHERE Subscription_id__c = :subId
+      ];
+
+      Date first_not_passed = null;
+      Date first_passed = null;
+      boolean first_element_not_passed = false;
+      boolean first_element_passed = false;
+
+      for (AcctSeed__Recurring_Billing__c billings : recurringBillings) {
+        //Inserting in AcctSeed__Recurring_Billing__c Object
+        billings.Subscription_amount__c = Decimal.valueOf(amount.Substring(0, amount.length() - 2));
+        billings.GoCardless_Subscription_Amount__c = Decimal.valueOf(amount);
+        billings.GoCardless_Status__c = status;
+
+        //Add the data to the List(billingsToInsert) : AcctSeed__Recurring_Billing__c Object
+        billingsToInsert.add(billings);
+      }
+
+      if (!billingsToInsert.isEmpty()) {
+        //Insert the List to the Object
+        update billingsToInsert;
+      }
+    }
+  }
+
   /******************************   Cancel Any Payment to Mandate    ******************************/
 
   //Cancel Any Payment to Mandate
@@ -521,7 +697,7 @@ public with sharing class GoCardlessRequest {
     }
 
     // Construct the REST API endpoint URL
-    String endpoint = BASE_URL + '/' + finalEndpoint + '/' + specificId + '/actions/cancel';
+    String endpoint = baseURL + '/' + finalEndpoint + '/' + specificId + '/actions/cancel';
 
     // Send HTTP request
     HttpResponse res = callAPI('POST', endpoint, '{}', null);
@@ -549,8 +725,6 @@ public with sharing class GoCardlessRequest {
           i.GoCardless_Status__c = 'cancelled';
           recurringRecordsToUpdate.add(i);
         }
-        System.debug('recurringRecordsToUpdate' + recurringRecordsToUpdate); 
-        System.debug('GCrecordsToUpdate' + GCrecordsToUpdate); 
 
         if (!GCrecordsToUpdate.isEmpty()) {
           update GCrecordsToUpdate;
@@ -588,7 +762,6 @@ public with sharing class GoCardlessRequest {
   @AuraEnabled
   public static List<sObject> getSpecificId(String objectName, String pageId, List<String> fieldApiNames) {
     List<sObject> specificId = new List<sObject>();
-    String x = String.join(fieldApiNames, ',');
     try {
       String query =
         'SELECT ' +
@@ -596,7 +769,6 @@ public with sharing class GoCardlessRequest {
         ' FROM ' +
         objectName +
         ' WHERE Id = :pageId LIMIT 1';
-      System.debug('query: ' + query);
       specificId = Database.query(query);
     } catch (Exception e) {
       throw new AuraHandledException(e.getMessage());
@@ -611,7 +783,7 @@ public with sharing class GoCardlessRequest {
     req.setEndpoint(endpoint);
     req.setMethod(method);
     req.setHeader('GoCardless-Version', VERSION);
-    req.setHeader('Authorization', 'Bearer ' + XYZ);
+    req.setHeader('Authorization', 'Bearer ' + accessToken);
     req.setHeader('Accept', 'application/json');
     req.setHeader('Content-Type', 'application/json');
     if (requestBody != null) {
@@ -638,7 +810,7 @@ public with sharing class GoCardlessRequest {
     public String status;
     public Integer amount_refunded;
     public String reference;
-    public Map<String, Object> metadata;
+    // public Map<String, Object> metadata;
     public PaymentFX fx;
     public PaymentLinks links;
     public Boolean retry_if_possible;
